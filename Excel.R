@@ -52,5 +52,4 @@ as.Date(dates, origin="1899-12-30")
 # Together, the origin parameter must be specified to account for a
 # two day offset
 
-za
 
