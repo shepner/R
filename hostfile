@@ -1,0 +1,3 @@
+#machine1.yourdomain.com cpu=4 sched=yes
+#machine2.yourdomain.com cpu=2 sched=yes
+localhost cpu=2 sched=yes
