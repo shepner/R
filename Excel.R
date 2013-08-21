@@ -1,4 +1,21 @@
 
+#install/update required packages
+load.fun <- function(x) {
+  x <- as.character(substitute(x))
+  if(isTRUE(x %in% .packages(all.available=TRUE))) {
+    eval(parse(text=paste("require(", x, ")", sep="")))
+  } else {
+    update.packages() # recommended before installing so that dependencies are the latest version
+    eval(parse(text=paste("install.packages('", x, "')", sep="")))
+    eval(parse(text=paste("require(", x, ")", sep="")))
+  }
+}
+
+load.fun(xlsx)
+load.fun(chron)
+load.fun(Rmpi)
+load.fun(snowfall)
+
 ################
 
 coln = function(x) {
@@ -8,12 +25,12 @@ coln = function(x) {
   return(y)
 }
 
+################
 
-setwd("/Users/shepner/Code/R/R")
+setwd("/Users/shepner/Downloads")
 filename="BodyComp.xlsx"
 page=1
 
-require(xlsx)
 data <- read.xlsx2(filename, sheetIndex=page, sheetName=NULL, startRow=1, endRow=NULL, as.data.frame=TRUE, header=TRUE, colClasses=c(
   Date="numeric", 
   Time="numeric",
@@ -38,6 +55,8 @@ data$Comments <- NULL
 
 #keep only rows with valid Dates
 data<-subset(data, data$Date >= 0)
+#same with weight
+data<-subset(data, data$Weight..lb. >= 0)
 
 #replace the "NaN" time entries with 0
 data$Time <- as.numeric(lapply(data$Time, function(x) ifelse(is.nan(x),0,x)))
@@ -48,7 +67,6 @@ data$Time <- as.numeric(lapply(data$Time, function(x) ifelse(is.nan(x),0,x)))
 data$DateTime <- ((data$Date*1e8) + (data$Time*1e8))/1e8
 
 #convert excel time to date time format (Could be shortened but this is showing the steps)
-library(chron)
 excelorig=chron("12/30/1899") #Use this for the origin of time in excel
 data$DateTime <- (excelorig + data$DateTime)
 data$DateTime <- substr(as.character(data$DateTime),2,18)
@@ -61,26 +79,35 @@ data$DateTranslate <- as.Date(data$Date, origin=excelorig)
 
 ################
 
+sfInit(parallel=TRUE, cpus=5, type="MPI")
+
 #unit conversions
-data$Weight..kg.<-data$Weight..lb. * 0.453592
-data$Neck..cm.<-data$Neck..in. * 2.54
-data$Navel..cm.<-data$Navel..in. * 2.54
-data$Height..cm.<-data$Height..in. * 2.54
-data$Age<-as.numeric((as.Date(data$DateTranslate) - as.Date("1969-12-05")) / 365)
+data$Weight..kg.<-as.numeric(sfLapply(data$Weight..lb., function(x) { x * 0.453592 }))
+data$Neck..cm.<-as.numeric(sfLapply(data$Neck..in., function(x) { x * 2.54 }))
+data$Navel..cm.<-as.numeric(sfLapply(data$Navel..in., function(x) { x * 2.54 }))
+data$Height..cm.<-as.numeric(sfLapply(data$Height..in., function(x) { x * 2.54 }))
+data$Age<-as.numeric(sfLapply(data$DateTranslate, function(x) { (as.Date(x) - as.Date("1969-12-05")) / 365 }))
+
+sfStop()
 
 ################
 
-#http://www.nerdfitness.com/blog/2012/07/02/body-fat-percentage/
-#http://www.leighpeele.com/body-fat-pictures-and-percentages
-
 #BMI
 data$BMI<-data$Weight..kg. / ((data$Height..cm./100)^2)
+gender=1 # M=1, F=0
+
+
+#sfInit(parallel=TRUE, cpus=4, type="MPI")
+
+
+#http://www.nerdfitness.com/blog/2012/07/02/body-fat-percentage/
+#http://www.leighpeele.com/body-fat-pictures-and-percentages
 
 #bodyfat  http://www.davedraper.com/bodyfat-calculation.html
 data$bf1<-((data$Weight..lb.-(((data$Weight..lb.*1.082)+94.42) - (data$Navel..in.*4.15))) * 100) / data$Weight..lb.
 
 #bodyfat from BMI  http://en.wikipedia.org/wiki/Body_fat_percentage
-gender=1 # M=1, F=0
+
 data$bf2<-(1.20 * data$BMI) + (0.23 * data$Age) - (10.8 * gender) - 5.4
 
 #US Navy bodyfat http://www.wikihow.com/Measure-Body-Fat-Using-the-US-Navy-Method
@@ -88,6 +115,8 @@ data$bf3<-(86.010*log10(data$Navel..cm. - data$Neck..cm.)) - (70.041*log10(data$
 
 #YMCA bodyfat http://www.doithome.com/help_inside3.html
 data$bf4<-((-98.42 + 4.15*data$Navel..in. - .082 * data$Weight..lb.) / data$Weight..lb.) * 100
+
+#sfStop()
 
 #average out the results
 data$bf<-rowMeans(data[,c("bf1", "bf2", "bf3", "bf4")], na.rm=T)
@@ -120,12 +149,12 @@ data$MR=data$BMR*1.5
 ################
 
 #calculate surface area
-parallel(data$SurfaceArea<-sqrt(data$Height..in. * data$Weight..lb. / 3131))
+data$SurfaceArea<-sqrt(data$Height..in. * data$Weight..lb. / 3131)
+
+################
 
 
 
-
-
-
+plot(data$DateTranslate, data$Weight..lb., "date", "weight")
 
 
