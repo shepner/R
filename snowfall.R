@@ -1,4 +1,3 @@
-
 #http://cran.r-project.org/web/packages/snowfall/vignettes/snowfall.pdf
 
 
@@ -58,5 +57,8 @@ q()
 
 #####
 
-http://www.umbc.edu/hpcf/resources-tara-2010/how-to-run-R.html
+#use this to detect the number of CPUs automatically:
+require(multicore)
+sfInit(parallel=T, type="MPI", cpus=multicore:::detectCores())
+sfClose()
 
