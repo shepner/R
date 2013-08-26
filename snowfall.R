@@ -60,5 +60,5 @@ q()
 #use this to detect the number of CPUs automatically:
 require(multicore)
 sfInit(parallel=T, type="MPI", cpus=multicore:::detectCores())
-sfClose()
+sfStop()
 
