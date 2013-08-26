@@ -62,3 +62,8 @@ require(multicore)
 sfInit(parallel=T, type="MPI", cpus=multicore:::detectCores())
 sfStop()
 
+#note that each instance of R is independant of all others
+#this means you must load require packaged each time a new instance starts
+#this also means that links to ffdf files are removed after the R instance ends(!)
+
+
