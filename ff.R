@@ -1,4 +1,3 @@
-
 #####
 
 #install/update required packages
@@ -68,5 +67,38 @@ multimerge = function (path, namepattern) {
 save.ffdf(data, dir="/Users/tkmawt6/Code/R/data")
 data=""
 load.ffdf(dir="/Users/tkmawt6/Code/R/data")
+
+#####
+
+min(data$Events)
+quantile(data$Events,na.rm=T,names=F,probs=.25) #first quantile
+mean(data$Events)
+quantile(data$Events,na.rm=T,names=F,probs=.75) #third quantile
+max(data$Events)
+
+unique(data$Events)
+
+#####
+
+#The median() function doesnt work against large vectors.  This is a workaround
+
+#sort the data
+dataeventsindex<-ffdforder(data[c("Events")]) #sort the data by the Events column
+data<-data[dataeventsindex,]
+
+#calculate the median from sorted data
+ffdfmedian<-function(x) {
+  l<-length(data$Events)
+  is.even<-function(x) x %% 2==0  #this isnt really needed used as a function here
+  if(is.even(l)) {
+    mean(c(data$Events[l/2], data$Events[(l/2)+1]))
+  } else {
+    data$Events[(l+1)/2]
+  }
+}
+de.median<-ffdfmedian(data$Events)
+
+
+
 
 
