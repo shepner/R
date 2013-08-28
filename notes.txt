@@ -1,2 +1,25 @@
-
 http://www.slideshare.net/bytemining/r-hpc
+
+Feed Item: Massive online data stream mining with R
+http://tagteam.harvard.edu/hub_feeds/1981/feed_items/144397
+
+
+http://math.illinoisstate.edu/dhkim/rstuff/rtutor.html
+
+http://rforwork.info/
+
+http://www.rdatamining.com/package
+
+http://rdatamining.wordpress.com/2012/05/06/online-resources-for-handling-big-data-and-parallel-computing-in-r/
+
+classes
+http://www.statistics.com/course-catalog/
+
+data mining info
+http://www.kdnuggets.com
+
+RapidMiner
+http://rapid-i.com
+
+high performance loops in R
+http://faculty.washington.edu/kenrice/sisg/SISG-08-05.pdf
