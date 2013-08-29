@@ -66,4 +66,19 @@ sfStop()
 #this means you must load require packaged each time a new instance starts
 #this also means that links to ffdf files are removed after the R instance ends(!)
 
+#####
+
+
+#example of a way to test performance with varying levels of parallism
+#note:  not working in the current example
+num <- 10
+for (j in 1:4){
+  sfInit(parallel = TRUE, type="MPI", cpus = j)
+  sfExport(list = c("trainset", "targettrain"))
+  sfClusterEval(library(glmnet))
+  sfClusterSetupRNG()
+  cat(system.time(lambdas <- sfClusterApplyLB(1:num, fi)))
+  flush.console()
+  sfStop()
+}
 
