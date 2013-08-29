@@ -23,3 +23,8 @@ http://rapid-i.com
 
 high performance loops in R
 http://faculty.washington.edu/kenrice/sisg/SISG-08-05.pdf
+
+http://www.kaggle.com/c/overfitting/forums/t/443/how-to-parallelise-r-code-included
+need to lookup glmnet
+
+
