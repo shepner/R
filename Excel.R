@@ -177,6 +177,6 @@ png(file="/Users/shepner/Downloads/bodyfat.png", width=1024, height=1024)
 plot(data$DateTranslate, data$bf, type="l", xlab="date", ylab="lbs")
 dev.off()
 
+################
 
-
-
+write.csv(data, file="/Users/shepner/Downloads/data.csv")
