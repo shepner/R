@@ -107,8 +107,18 @@ gender=1 # M=1, F=0
 data$bf1<-((data$Weight..lb.-(((data$Weight..lb.*1.082)+94.42) - (data$Navel..in.*4.15))) * 100) / data$Weight..lb.
 
 #bodyfat from BMI  http://en.wikipedia.org/wiki/Body_fat_percentage
-
-data$bf2<-(1.20 * data$BMI) + (0.23 * data$Age) - (10.8 * gender) - 5.4
+data$bf2 <- mapply(
+  function(d, b, a) {
+    ifelse(
+      d<"2011-1-1", 
+      ((1.20 * b) + (0.23 * a) - (10.8 * gender) - 5.4), 
+      NaN 
+    )
+  }, 
+  data$DateTranslate, 
+  data$BMI,
+  data$Age
+)
 
 #US Navy bodyfat http://www.wikihow.com/Measure-Body-Fat-Using-the-US-Navy-Method
 data$bf3<-(86.010*log10(data$Navel..cm. - data$Neck..cm.)) - (70.041*log10(data$Height..cm.)) + ((-(86.010-70.041)*log10(2.54)) + 36.76)
@@ -153,8 +163,20 @@ data$SurfaceArea<-sqrt(data$Height..in. * data$Weight..lb. / 3131)
 
 ################
 
+#calculate lbs of excess fat
+bfgoal=12
+tail(data$Weight..lb.,n=1)*((tail(data$bf,n=1)-bfgoal)/100)
+
+################
+
+png(file="/Users/shepner/Downloads/bodyweight.png", width=1024, height=1024)
+plot(data$DateTranslate, data$Weight..lb., type="l", xlab="date", ylab="lbs")
+dev.off()
+
+png(file="/Users/shepner/Downloads/bodyfat.png", width=1024, height=1024)
+plot(data$DateTranslate, data$bf, type="l", xlab="date", ylab="lbs")
+dev.off()
 
 
-plot(data$DateTranslate, data$Weight..lb., "date", "weight")
 
 
